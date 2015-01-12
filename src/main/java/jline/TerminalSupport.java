@@ -120,4 +120,10 @@ public abstract class TerminalSupport
         // null for unknown
         return null;
     }
+
+    public void disableInterruptCharacter(){
+    }
+
+    public void enableInterruptCharacter() {
+    }
 }

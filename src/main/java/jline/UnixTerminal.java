@@ -104,7 +104,7 @@ public class UnixTerminal
             Log.error("Failed to ", (enabled ? "enable" : "disable"), " echo", e);
         }
     }
-
+    @Override
     public void disableInterruptCharacter()
     {
         try {
@@ -118,6 +118,7 @@ public class UnixTerminal
         }
     }
 
+    @Override
     public void enableInterruptCharacter()
     {
         try {

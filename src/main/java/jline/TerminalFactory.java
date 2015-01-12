@@ -35,10 +35,12 @@ public class TerminalFactory
     public static final String WIN = "win";
 
     public static final String WINDOWS = "windows";
-
+    
     public static final String NONE = "none";
 
     public static final String OFF = "off";
+    
+    public static final String MINTTY = "mintty";
 
     public static final String FALSE = "false";
 
@@ -70,6 +72,9 @@ public class TerminalFactory
             }
             else if (tmp.equals(NONE) || tmp.equals(OFF) || tmp.equals(FALSE)) {
                 t = new UnsupportedTerminal();
+            }
+            else if( tmp.equals(MINTTY)){
+                t = new MinttyTerminal();
             }
             else {
                 if (tmp.equals(AUTO)) {

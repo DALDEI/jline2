@@ -10,6 +10,7 @@ package jline.internal;
 
 import java.io.PrintStream;
 
+import jline.Logger;
 import static jline.internal.Preconditions.checkNotNull;
 
 /**
@@ -22,15 +23,36 @@ public final class Log
 {
     ///CLOVER:OFF
 
-    public static enum Level
-    {
-        TRACE,
-        DEBUG,
-        INFO,
-        WARN,
-        ERROR
-    }
+    private static class DefaultLogger implements Logger {
 
+        public void log(Logger.Level level, Object... messages) {
+            switch( level ){
+            case TRACE : if( ! TRACE) return ;
+            case DEBUG : if( ! (TRACE||DEBUG ) ) return ;
+            default:
+            }
+            //noinspection SynchronizeOnNonFinalField
+            synchronized (output) {
+                output.format("[%s] ", level);
+
+                for (int i=0; i<messages.length; i++) {
+                    // Special handling for the last message if its a throwable, render its stack on the next line
+                    if (i + 1 == messages.length && messages[i] instanceof Throwable) {
+                        output.println();
+                        ((Throwable)messages[i]).printStackTrace(output);
+                    }
+                    else {
+                        render(output, messages[i]);
+                    }
+                }
+
+                output.println();
+                output.flush();
+            }
+        }
+        
+    }
+    
     @SuppressWarnings({"StringConcatenation"})
     public static final boolean TRACE = Boolean.getBoolean(Log.class.getName() + ".trace");
 
@@ -38,6 +60,7 @@ public final class Log
     public static final boolean DEBUG = TRACE || Boolean.getBoolean(Log.class.getName() + ".debug");
 
     private static PrintStream output = System.err;
+    private static Logger mLogger = new DefaultLogger();
 
     public static PrintStream getOutput() {
         return output;
@@ -47,6 +70,13 @@ public final class Log
         output = checkNotNull(out);
     }
 
+    
+    public static Logger getLogger() { 
+        return mLogger ;
+    }
+    public static void setLogger( Logger l ){
+        mLogger = l ;
+    }
     /**
      * Helper to support rendering messages.
      */
@@ -70,51 +100,31 @@ public final class Log
     }
 
     @TestAccessible
-    static void log(final Level level, final Object... messages) {
-        //noinspection SynchronizeOnNonFinalField
-        synchronized (output) {
-            output.format("[%s] ", level);
-
-            for (int i=0; i<messages.length; i++) {
-                // Special handling for the last message if its a throwable, render its stack on the next line
-                if (i + 1 == messages.length && messages[i] instanceof Throwable) {
-                    output.println();
-                    ((Throwable)messages[i]).printStackTrace(output);
-                }
-                else {
-                    render(output, messages[i]);
-                }
-            }
-
-            output.println();
-            output.flush();
-        }
+    static void log(final Logger.Level level, final Object... messages) {
+        assert( mLogger != null);
+        mLogger.log(level, messages);
     }
 
     public static void trace(final Object... messages) {
-        if (TRACE) {
-            log(Level.TRACE, messages);
-        }
+       log(Logger.Level.TRACE, messages);
     }
 
     public static void debug(final Object... messages) {
-        if (TRACE || DEBUG) {
-            log(Level.DEBUG, messages);
-        }
+       log(Logger.Level.DEBUG, messages);
     }
 
     /**
      * @since 2.7
      */
     public static void info(final Object... messages) {
-        log(Level.INFO, messages);
+        log(Logger.Level.INFO, messages);
     }
 
     public static void warn(final Object... messages) {
-        log(Level.WARN, messages);
+        log(Logger.Level.WARN, messages);
     }
 
     public static void error(final Object... messages) {
-        log(Level.ERROR, messages);
+        log(Logger.Level.ERROR, messages);
     }
 }

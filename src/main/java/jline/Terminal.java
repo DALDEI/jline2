@@ -62,4 +62,8 @@ public interface Terminal
 
     String getOutputEncoding();
 
+    void disableInterruptCharacter();
+
+    void enableInterruptCharacter();
+
 }

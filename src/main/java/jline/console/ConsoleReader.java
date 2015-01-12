@@ -3153,8 +3153,8 @@ public class ConsoleReader
             if (!terminal.isSupported()) {
                 afterReadLine();
             }
-            if (handleUserInterrupt && (terminal instanceof UnixTerminal)) {
-                ((UnixTerminal) terminal).enableInterruptCharacter();
+            if (handleUserInterrupt ) {
+               terminal.enableInterruptCharacter();
             }
         }
     }

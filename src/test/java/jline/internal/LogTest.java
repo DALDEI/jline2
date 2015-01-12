@@ -8,7 +8,7 @@
  */
 package jline.internal;
 
-import jline.internal.Log.Level;
+import jline.Logger.Level;
 import org.junit.Before;
 import org.junit.Test;
 
