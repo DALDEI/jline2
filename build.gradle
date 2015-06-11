@@ -1,0 +1,104 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'java-library-distribution'
+apply plugin: 'ivy-publish'
+apply plugin: 'maven-publish'
+apply plugin: 'eclipse'
+
+group = 'jline'
+version = '2.13-SNAPSHOT'
+
+description = """JLine2"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+  repositories {
+    mavenLocal()
+    jcenter()
+  
+  maven {
+	  url "${awsRepoBucket}/maven2"
+	  credentials(AwsCredentials) {
+		  accessKey "${awsAccessKey}"
+		  secretKey "${awsSecretKey}"
+	  }
+  }
+  
+  ivy {
+	  url "${awsRepoBucket}/ivyrepo"
+	  credentials(AwsCredentials) {
+		  accessKey "${awsAccessKey}"
+		  secretKey "${awsSecretKey}"
+	  }
+  }
+}
+  
+dependencies {
+    compile group: 'org.fusesource.jansi', name: 'jansi', version:'1.11'
+    testCompile group: 'junit', name: 'junit', version:'4.10'
+}
+//packaging tests
+task packageTests(type: Jar) {
+  from sourceSets.test.output
+  classifier = 'tests'
+}
+artifacts.archives packageTests
+
+
+jar {
+	from sourceSets.main.output
+}
+task sourceJar(type: Jar) {
+	from sourceSets.main.allJava
+	
+}
+
+publishing {
+	
+	repositories {
+		maven {
+			url "${awsRepoBucket}/maven2"
+			credentials(AwsCredentials) {
+				accessKey "${awsAccessKey}"
+				secretKey "${awsSecretKey}"
+			}
+		}
+		
+		ivy {
+			url "${awsRepoBucket}/ivyrepo"
+			credentials(AwsCredentials) {
+				accessKey "${awsAccessKey}"
+				secretKey "${awsSecretKey}"
+			}
+		}
+		
+		
+	}
+	
+
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+			artifact sourceJar {
+				classifier "sources"
+			}
+		  pom.withXml {
+		asNode().appendNode('description',
+			'JLine2 for xmlsh')
+		  }
+		}
+		ivyJava(IvyPublication) {
+			from components.java
+			artifact(sourceJar) {
+				type "source"
+				conf "runtime"
+			}
+			descriptor.withXml {
+				asNode().info[0].appendNode('description', 'JLine2 for xmlsh')
+			}
+		}
+} 
+
+}
