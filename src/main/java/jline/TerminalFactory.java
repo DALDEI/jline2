@@ -32,6 +32,8 @@ public class TerminalFactory
 
     public static final String UNIX = "unix";
 
+    public static final String FREEBSD = "freebsd";
+
     public static final String WIN = "win";
 
     public static final String WINDOWS = "windows";

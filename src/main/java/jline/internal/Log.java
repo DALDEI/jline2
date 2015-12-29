@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2012, the original author or authors.
+ * Copyright (c) 2002-2015, the original author or authors.
  *
  * This software is distributable under the BSD license. See the terms of the
  * BSD license in the documentation provided with this software.
@@ -17,6 +17,7 @@ import static jline.internal.Preconditions.checkNotNull;
  * Internal logger.
  *
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
+ * @author <a href="mailto:gnodet@gmail.com">Guillaume Nodet</a>
  * @since 2.0
  */
 public final class Log
@@ -61,6 +62,8 @@ public final class Log
 
     private static PrintStream output = System.err;
     private static Logger mLogger = new DefaultLogger();
+
+    private static boolean useJul = Configuration.getBoolean("jline.log.jul");
 
     public static PrintStream getOutput() {
         return output;
