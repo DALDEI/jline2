@@ -5,7 +5,7 @@ apply plugin: 'ivy-publish'
 apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 
-group = 'jline'
+group = 'org.xmlsh'
 version = '2.13-SNAPSHOT'
 
 description = """JLine2"""
