@@ -21,16 +21,16 @@ targetCompatibility = 1.8
   maven {
 	  url "${awsRepoBucket}/maven2"
 	  credentials(AwsCredentials) {
-		  accessKey "${awsAccessKey}"
-		  secretKey "${awsSecretKey}"
+		  accessKey project.getProperty("xmlsh.awsAccessKey")
+		  secretKey project.getProperty("xmlsh.awsSecretKey")
 	  }
   }
   
   ivy {
 	  url "${awsRepoBucket}/ivyrepo"
 	  credentials(AwsCredentials) {
-		  accessKey "${awsAccessKey}"
-		  secretKey "${awsSecretKey}"
+		  accessKey project.getProperty("xmlsh.awsAccessKey")
+		  secretKey project.getProperty("xmlsh.awsSecretKey")
 	  }
   }
 }
@@ -59,27 +59,25 @@ task sourceJar(type: Jar) {
 }
 
 publishing {
-	
-	repositories {
-		maven {
-			url "${awsRepoBucket}/maven2"
-			credentials(AwsCredentials) {
-				accessKey "${awsAccessKey}"
-				secretKey "${awsSecretKey}"
-			}
+
+  repositories {
+	maven {
+		url "${awsRepoBucket}/maven2"
+		credentials(AwsCredentials) {
+		  accessKey project.getProperty("xmlsh.awsAccessKey")
+		  secretKey project.getProperty("xmlsh.awsSecretKey")
 		}
-		
-		ivy {
-			url "${awsRepoBucket}/ivyrepo"
-			credentials(AwsCredentials) {
-				accessKey "${awsAccessKey}"
-				secretKey "${awsSecretKey}"
-			}
-		}
-		
-		
 	}
 	
+	ivy {
+		url "${awsRepoBucket}/ivyrepo"
+		credentials(AwsCredentials) {
+		  accessKey project.getProperty("xmlsh.awsAccessKey")
+		  secretKey project.getProperty("xmlsh.awsSecretKey")
+		}
+	}
+	
+  }
 
 	publications {
 		mavenJava(MavenPublication) {
