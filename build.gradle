@@ -6,7 +6,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'eclipse'
 
 group = 'org.xmlsh'
-version = '2.14-SNAPSHOT'
+version = '2.15-SNAPSHOT'
 
 description = """JLine2"""
 

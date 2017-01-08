@@ -131,8 +131,5 @@ public class DefaultTerminal2 implements Terminal2 {
     public String getStringCapability(String capability) {
         return strings.get(capability);
     }
-    public void disableInterruptCharacter() {} ;
-
-    public void enableInterruptCharacter() {} ;
 
 }

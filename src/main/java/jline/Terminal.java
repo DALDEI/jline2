@@ -60,13 +60,9 @@ public interface Terminal
 
     void setEchoEnabled(boolean enabled);
 
-    void disableInterruptCharacter();
-    void enableInterruptCharacter();
-
     String getOutputEncoding();
 
     void disableInterruptCharacter();
-
     void enableInterruptCharacter();
 
 }

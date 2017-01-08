@@ -127,9 +127,4 @@ public abstract class TerminalSupport
         return null;
     }
 
-    public void disableInterruptCharacter(){
-    }
-
-    public void enableInterruptCharacter() {
-    }
 }
