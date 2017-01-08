@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2015, the original author or authors.
+ * Copyright (c) 2002-2016, the original author or authors.
  *
  * This software is distributable under the BSD license. See the terms of the
  * BSD license in the documentation provided with this software.
@@ -114,17 +114,25 @@ public class WindowsTerminal
             setConsoleMode(getConsoleMode() |
                 ENABLE_ECHO_INPUT.code |
                 ENABLE_LINE_INPUT.code |
-                ENABLE_PROCESSED_INPUT.code |
                 ENABLE_WINDOW_INPUT.code);
         }
         else {
             setConsoleMode(getConsoleMode() &
                 ~(ENABLE_LINE_INPUT.code |
                     ENABLE_ECHO_INPUT.code |
-                    ENABLE_PROCESSED_INPUT.code |
                     ENABLE_WINDOW_INPUT.code));
         }
         super.setEchoEnabled(enabled);
+    }
+
+    public void disableInterruptCharacter() {
+        setConsoleMode(getConsoleMode() &
+            ~(ENABLE_PROCESSED_INPUT.code));
+    }
+
+    public void enableInterruptCharacter() {
+        setConsoleMode(getConsoleMode() |
+            ENABLE_PROCESSED_INPUT.code);
     }
 
     /**
@@ -199,11 +207,11 @@ public class WindowsTerminal
     //
     // Native Bits
     //
-    private int getConsoleMode() {
+    private static int getConsoleMode() {
         return WindowsSupport.getConsoleMode();
     }
 
-    private void setConsoleMode(int mode) {
+    private static void setConsoleMode(int mode) {
         WindowsSupport.setConsoleMode(mode);
     }
 
@@ -291,15 +299,15 @@ public class WindowsTerminal
         return sb.toString().getBytes();
     }
 
-    private int getConsoleOutputCodepage() {
+    private static int getConsoleOutputCodepage() {
         return Kernel32.GetConsoleOutputCP();
     }
 
-    private int getWindowsTerminalWidth() {
+    private static int getWindowsTerminalWidth() {
         return WindowsSupport.getWindowsTerminalWidth();
     }
 
-    private int getWindowsTerminalHeight() {
+    private static int getWindowsTerminalHeight() {
         return WindowsSupport.getWindowsTerminalHeight();
     }
 

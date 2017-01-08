@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2002-2015, the original author or authors.
+    Copyright (c) 2002-2016, the original author or authors.
 
     This software is distributable under the BSD license. See the terms of the
     BSD license in the documentation provided with this software.
@@ -14,6 +14,8 @@ Description
 JLine is a Java library for handling console input. It is similar in functionality to [BSD editline](http://www.thrysoee.dk/editline/) and [GNU readline](http://www.gnu.org/s/readline/). People familiar with the readline/editline capabilities for modern shells (such as bash and tcsh) will find most of the command editing features of JLine to be familiar.
 
 JLine 2.x is an evolution of [JLine 1.x](https://github.com/jline/jline) which was previously maintained at [SourceForge](http://jline.sourceforge.net/).
+
+JLine 2.x development has come to an end, and users are encouraged to investigate the use of [JLine 3.x](https://github.com/jline/jline3) instead.
 
 License
 -------
@@ -39,7 +41,7 @@ Use the following definition to use JLine in your maven project:
     <dependency>
       <groupId>jline</groupId>
       <artifactId>jline</artifactId>
-      <version>2.12</version>
+      <version>2.14.2</version>
     </dependency>
 
 Building

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2015, the original author or authors.
+ * Copyright (c) 2002-2016, the original author or authors.
  *
  * This software is distributable under the BSD license. See the terms of the
  * BSD license in the documentation provided with this software.
@@ -117,7 +117,7 @@ public class CandidateListCompletionHandler
         if (distinct.size() > reader.getAutoprintThreshold()) {
             //noinspection StringConcatenation
             reader.println();
-            reader.print(Messages.DISPLAY_CANDIDATES.format(candidates.size()));
+            reader.print(Messages.DISPLAY_CANDIDATES.format(distinct.size()));
             reader.flush();
 
             int c;
@@ -205,9 +205,9 @@ public class CandidateListCompletionHandler
     /**
      * @return true is all the elements of <i>candidates</i> start with <i>starts</i>
      */
-    private boolean startsWith(final String starts, final String[] candidates) {
+    private static boolean startsWith(final String starts, final String[] candidates) {
         for (String candidate : candidates) {
-            if (!candidate.startsWith(starts)) {
+            if (!candidate.toLowerCase().startsWith(starts.toLowerCase())) {
                 return false;
             }
         }

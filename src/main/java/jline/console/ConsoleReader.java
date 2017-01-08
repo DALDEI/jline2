@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2015, the original author or authors.
+ * Copyright (c) 2002-2016, the original author or authors.
  *
  * This software is distributable under the BSD license. See the terms of the
  * BSD license in the documentation provided with this software.
@@ -15,6 +15,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -70,7 +71,7 @@ import static jline.internal.Preconditions.checkNotNull;
  * @author <a href="mailto:jason@planet57.com">Jason Dillon</a>
  * @author <a href="mailto:gnodet@gmail.com">Guillaume Nodet</a>
  */
-public class ConsoleReader
+public class ConsoleReader implements Closeable
 {
     public static final String JLINE_NOBELL = "jline.nobell";
 
@@ -81,6 +82,8 @@ public class ConsoleReader
     public static final String INPUT_RC = ".inputrc";
 
     public static final String DEFAULT_INPUT_RC = "/etc/inputrc";
+
+    public static final String JLINE_EXPAND_EVENTS = "jline.expandevents";
 
     public static final char BACKSPACE = '\b';
 
@@ -108,7 +111,7 @@ public class ConsoleReader
     private String prompt;
     private int    promptLen;
 
-    private boolean expandEvents = true;
+    private boolean expandEvents = Configuration.getBoolean(JLINE_EXPAND_EVENTS, true);
 
     private boolean bellEnabled = !Configuration.getBoolean(JLINE_NOBELL, true);
 
@@ -284,7 +287,7 @@ public class ConsoleReader
         }
     }
 
-    private URL getInputRc() throws IOException {
+    private static URL getInputRc() throws IOException {
         String path = Configuration.getString(JLINE_INPUTRC);
         if (path == null) {
             File f = new File(Configuration.getUserHome(), INPUT_RC);
@@ -327,19 +330,29 @@ public class ConsoleReader
      * have completed using the reader as it shuts down and cleans up resources
      * that would otherwise be "leaked".
      */
-    public void shutdown() {
+    @Override
+    public void close() {
         if (in != null) {
             in.shutdown();
         }
     }
 
     /**
+     * Shuts the console reader down.  The same as {@link #close()}.
+     * @deprecated Use {@link #close()} instead.
+     */
+    @Deprecated
+    public void shutdown() {
+        this.close();
+    }
+    
+    /**
      * Shuts down the ConsoleReader if the JVM attempts to clean it up.
      */
     @Override
     protected void finalize() throws Throwable {
         try {
-            shutdown();
+            close();
         }
         finally {
             super.finalize();
@@ -478,7 +491,7 @@ public class ConsoleReader
 
     public void setPrompt(final String prompt) {
         this.prompt = prompt;
-        this.promptLen = ((prompt == null) ? 0 : wcwidth(Ansi.stripAnsi(lastLine(prompt)), 0));
+        this.promptLen = (prompt == null) ? 0 : wcwidth(Ansi.stripAnsi(lastLine(prompt)), 0);
     }
 
     public String getPrompt() {
@@ -587,7 +600,7 @@ public class ConsoleReader
      * prompt is returned if no '\n' characters are present.
      * null is returned if prompt is null.
      */
-    private String lastLine(String str) {
+    private static String lastLine(String str) {
         if (str == null) return "";
         int last = str.lastIndexOf("\n");
 
@@ -669,7 +682,7 @@ public class ConsoleReader
             rawPrint(prompt);
         }
 
-        print(buf.buffer, 0, buf.cursor, promptLen);
+        fmtPrint(buf.buffer, 0, buf.cursor, promptLen);
 
         // force drawBuffer to check for weird wrap (after clear screen)
         drawBuffer();
@@ -881,7 +894,7 @@ public class ConsoleReader
         }
         String result = sb.toString();
         if (!str.equals(result)) {
-            print(result);
+            fmtPrint(result, getCursorPosition());
             println();
             flush();
         }
@@ -897,7 +910,7 @@ public class ConsoleReader
         buf.write(str);
         if (mask == null) {
             // no masking
-            print(str, pos);
+            fmtPrint(str, pos);
         } else if (mask == NULL_MASK) {
             // don't print anything
         } else {
@@ -923,7 +936,7 @@ public class ConsoleReader
                     nbChars = 0;
                 }
             } else {
-                print(buf.buffer, buf.cursor, buf.length());
+                fmtPrint(buf.buffer, buf.cursor, buf.length());
             }
         }
         int cursorPos = promptLen + wcwidth(buf.buffer, 0, buf.length(), promptLen);
@@ -1429,7 +1442,7 @@ public class ConsoleReader
         return ok;
     }
 
-    private char switchCase(char ch) {
+    private static char switchCase(char ch) {
         if (Character.isUpperCase(ch)) {
             return Character.toLowerCase(ch);
         }
@@ -1843,7 +1856,7 @@ public class ConsoleReader
      * @return 1 is square, 2 curly, 3 parent, or zero for none.  The value
      *   will be negated if it is the closing form of the bracket.
      */
-    private int getBracketType (char ch) {
+    private static int getBracketType (char ch) {
         switch (ch) {
             case '[': return  1;
             case ']': return -1;
@@ -2270,16 +2283,7 @@ public class ConsoleReader
                         && pushBackChar.isEmpty()
                         && in.isNonBlockingEnabled()
                         && in.peek(escapeTimeout) == READ_EXPIRED) {
-                    Object otherKey = ((KeyMap) o).getAnotherKey();
-                    if (otherKey == null) {
-                        // Tne next line is in case a binding was set up inside this secondary
-                        // KeyMap (like EMACS_META).  For example, a binding could be put
-                        // there for an ActionListener for the ESC key.  This way, the var 'o' won't
-                        // be null and the code can proceed to let the ActionListener be
-                        // handled, below.
-                        otherKey = ((KeyMap) o).getBound(Character.toString((char) c));
-                    }
-                    o = otherKey;
+                    o = ((KeyMap) o).getAnotherKey();
                     if (o == null || o instanceof KeyMap) {
                         continue;
                     }
@@ -2428,8 +2432,9 @@ public class ConsoleReader
                 beforeReadLine(prompt, mask);
             }
 
-            if (prompt != null && prompt.length() > 0) {
-                out.write(prompt);
+            if (buffer != null && buffer.length() > 0
+                    || prompt != null && prompt.length() > 0) {
+                drawLine();
                 out.flush();
             }
 
@@ -2438,8 +2443,8 @@ public class ConsoleReader
                 return readLineSimple();
             }
 
-            if (handleUserInterrupt && (terminal instanceof UnixTerminal)) {
-                ((UnixTerminal) terminal).disableInterruptCharacter();
+            if (handleUserInterrupt) {
+                terminal.disableInterruptCharacter();
             }
             if (handleLitteralNext && (terminal instanceof UnixTerminal)) {
                 ((UnixTerminal) terminal).disableLitteralNextCharacter();
@@ -3195,8 +3200,8 @@ public class ConsoleReader
             if (!terminal.isSupported()) {
                 afterReadLine();
             }
-            if (handleUserInterrupt ) {
-               terminal.enableInterruptCharacter();
+            if (handleUserInterrupt) {
+                terminal.enableInterruptCharacter();
             }
         }
     }
@@ -3429,20 +3434,18 @@ public class ConsoleReader
     // Printing
     //
 
-    public static final String CR = Configuration.getLineSeparator();
-
     /**
      * Output the specified characters to the output stream without manipulating the current buffer.
      */
-    private int print(final CharSequence buff, int cursorPos) throws IOException {
-        return print(buff, 0, buff.length(), cursorPos);
+    private int fmtPrint(final CharSequence buff, int cursorPos) throws IOException {
+        return fmtPrint(buff, 0, buff.length(), cursorPos);
     }
 
-    private int print(final CharSequence buff, int start, int end) throws IOException {
-        return print(buff, start, end, getCursorPosition());
+    private int fmtPrint(final CharSequence buff, int start, int end) throws IOException {
+        return fmtPrint(buff, start, end, getCursorPosition());
     }
 
-    private int print(final CharSequence buff, int start, int end, int cursorPos) throws IOException {
+    private int fmtPrint(final CharSequence buff, int start, int end, int cursorPos) throws IOException {
         checkNotNull(buff);
         for (int i = start; i < end; i++) {
             char c = buff.charAt(i);
@@ -3472,7 +3475,7 @@ public class ConsoleReader
      * Output the specified string to the output stream (but not the buffer).
      */
     public void print(final CharSequence s) throws IOException {
-        print(s, getCursorPosition());
+        rawPrint(s.toString());
     }
 
     public void println(final CharSequence s) throws IOException {
@@ -3986,7 +3989,7 @@ public class ConsoleReader
      * @param c     The character to test
      * @return      True if it is a delimiter
      */
-    private boolean isDelimiter(final char c) {
+    private static boolean isDelimiter(final char c) {
         return !Character.isLetterOrDigit(c);
     }
 
@@ -3999,7 +4002,7 @@ public class ConsoleReader
      * @param c The character to check
      * @return true if the character is a whitespace
      */
-    private boolean isWhitespace(final char c) {
+    private static boolean isWhitespace(final char c) {
         return Character.isWhitespace (c);
     }
 

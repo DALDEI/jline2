@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002-2015, the original author or authors.
+ * Copyright (c) 2002-2016, the original author or authors.
  *
  * This software is distributable under the BSD license. See the terms of the
  * BSD license in the documentation provided with this software.
@@ -152,7 +152,7 @@ public final class KillRing {
     private void prev() {
         head--;
         if (head == -1) {
-            int x = (slots.length - 1);
+            int x = slots.length - 1;
             for (; x >= 0; x--) {
                 if (slots[x] != null) {
                     break;
