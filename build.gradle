@@ -19,7 +19,7 @@ targetCompatibility = 1.8
     jcenter()
   
   maven {
-	  url "${awsRepoBucket}/maven2"
+	  url project.getProperty("xmlsh.awsRepoBucket") + "/maven2"
 	  credentials(AwsCredentials) {
 		  accessKey project.getProperty("xmlsh.awsAccessKey")
 		  secretKey project.getProperty("xmlsh.awsSecretKey")
@@ -27,7 +27,7 @@ targetCompatibility = 1.8
   }
   
   ivy {
-	  url "${awsRepoBucket}/ivyrepo"
+	  url project.getProperty("xmlsh.awsRepoBucket") + "/ivyrepo"
 	  credentials(AwsCredentials) {
 		  accessKey project.getProperty("xmlsh.awsAccessKey")
 		  secretKey project.getProperty("xmlsh.awsSecretKey")
@@ -62,7 +62,7 @@ publishing {
 
   repositories {
 	maven {
-		url "${awsRepoBucket}/maven2"
+	        url project.getProperty("xmlsh.awsRepoBucket") + "/maven2"
 		credentials(AwsCredentials) {
 		  accessKey project.getProperty("xmlsh.awsAccessKey")
 		  secretKey project.getProperty("xmlsh.awsSecretKey")
@@ -70,7 +70,7 @@ publishing {
 	}
 	
 	ivy {
-		url "${awsRepoBucket}/ivyrepo"
+	        url project.getProperty("xmlsh.awsRepoBucket") + "/ivyrepo"
 		credentials(AwsCredentials) {
 		  accessKey project.getProperty("xmlsh.awsAccessKey")
 		  secretKey project.getProperty("xmlsh.awsSecretKey")
